@@ -1,6 +1,6 @@
 {
   "name": "@dingyiliao/dsh-mcp-settings",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH bundle for managing stdio and Streamable HTTP MCP servers from Settings",
   "type": "module",
   "main": "./lib/types/index.js",
@@ -24,6 +24,7 @@
     "lib/types/**/*.js",
     "cordis.patch.yml",
     "README.md",
+    "README.zh-CN.md",
     "LICENSE"
   ],
   "dsh": {

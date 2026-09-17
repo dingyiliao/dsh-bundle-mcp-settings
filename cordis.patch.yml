@@ -3,5 +3,3 @@
 - insert:
     - id: managed-mcp-settings
       name: '@dingyiliao/dsh-mcp-settings'
-      config:
-        servers: {}

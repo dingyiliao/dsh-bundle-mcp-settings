@@ -1,39 +1,73 @@
 # DSH MCP Settings Bundle
 
-一个可独立安装的 DeepSeek Harness Bundle：在 **设置 → 插件 → MCP** 中管理多个 stdio 或 Streamable HTTP MCP server，并把它们的工具动态挂载到 Agent。
+[English](./README.md) | [简体中文](./README.zh-CN.md)
 
-## 包含内容
+An installable DeepSeek Harness bundle for managing multiple stdio and
+Streamable HTTP MCP servers from **Settings → Plugins → MCP**, then exposing
+their tools to the Agent at runtime.
 
-- Host 插件：注册 `mcp` settings namespace，并为每条启用的记录创建一个官方 `@deepseek-ai/dsh-mcp-client` Fiber。
-- Client 插件：向现有的 `settings.plugins.tab` slot 注册 MCP 管理页面。
-- Bundle patch：把 Host 与 Client 两个 face 作为一个可安装功能加入 Profile。
+## What is included
 
-Bundle 不重新实现 MCP 协议，只管理 DSH 已有 MCP client 的配置与生命周期。修改一条 server 只会替换对应 Fiber；未变化的连接会保留。
+- A Host plugin that registers the `mcp` settings namespace and creates one
+  official `@deepseek-ai/dsh-mcp-client` Fiber for each enabled server.
+- A Client plugin that contributes an MCP management tab to the existing
+  `settings.plugins.tab` slot.
+- A bundle patch that installs both faces as one Profile feature.
 
-## 兼容性
+This bundle does not reimplement MCP. It manages the configuration and
+lifecycle of DSH's existing MCP client. Editing one server replaces only that
+server's Fiber; unchanged connections stay mounted.
 
-当前版本面向 DeepSeek Harness `0.1.6-alpha.1` 及其后的同代 API，要求目标 Profile 已包含：
+## Compatibility
 
-- `@deepseek-ai/dsh-settings` 与可写 settings provider；
-- `@deepseek-ai/dsh-mcp-client`、`tools` 和 `mcp-resources`；
-- Web/Desktop Client 的 Settings、Plugins、Remote 与 Slots 基础插件。
+The current release targets DeepSeek Harness `0.1.6-alpha.1` and compatible
+versions of the same APIs. The target Profile must already provide:
 
-这些依赖由当前官方 Web/Desktop 组合提供，不由本 Bundle 下载或替换。仓库提交了构建产物，因此从 GitHub 安装不会执行 `prepare` 或其他安装脚本。
+- `@deepseek-ai/dsh-settings` and a writable settings provider;
+- `@deepseek-ai/dsh-mcp-client`, `tools`, and `mcp-resources`;
+- the Web/Desktop Client Settings, Plugins, Remotes, and Slots foundation.
 
-## 安装
+The official Web/Desktop compositions currently provide these dependencies.
+They are not downloaded or replaced by this bundle. Built Host and Client
+artifacts are committed, so installing from GitHub does not run `prepare` or
+another package installation script.
+
+## Install
 
 ```bash
-dsh plugin --profile web add github:dingyiliao/dsh-bundle-mcp-settings#v0.1.0
+dsh plugin --profile web add github:dingyiliao/dsh-bundle-mcp-settings#v0.1.1
 ```
 
-安装后重启 DSH。版本标签便于安装；对供应链固定要求更高时，可以把
-`v0.1.0` 换成对应的完整 commit SHA。
+Restart DSH after installation. A version tag is convenient; for stricter
+supply-chain pinning, replace `v0.1.1` with its full commit SHA.
 
-正式打包的 Desktop 目前只接受 npm registry 包，不能直接接收 `github:` spec；该场景需要等待发布到 npm，或由 Desktop 后续增加 GitHub source 支持。
+The packaged Desktop application currently accepts npm-registry packages only,
+not a direct `github:` spec. That path requires publishing this bundle to npm
+or adding GitHub-source support to Desktop.
 
-## 配置行为
+## Configuration and persistence
 
-设置文档使用 `mcp.servers`：
+The bundle patch only mounts the manager:
+
+```yaml
+- insert:
+    - id: managed-mcp-settings
+      name: '@dingyiliao/dsh-mcp-settings'
+```
+
+It intentionally does not store MCP servers in the patch. The plugin schema
+supplies an empty default when no settings exist, while edits made in the UI
+are persisted by the Profile's settings provider under the `mcp` namespace.
+Resolution follows this order:
+
+```text
+schema defaults → composition base → persisted user section
+```
+
+Therefore restarting DSH, reloading the bundle, or mounting the same patch does
+not reset saved servers.
+
+The persisted document uses `mcp.servers`:
 
 ```yaml
 mcp:
@@ -60,18 +94,24 @@ mcp:
         maxAttempts: 10
 ```
 
-`env` 与 HTTP `headers` 使用 settings schema 的 secret role。读取设置时只返回“哪些 key 已配置”，不会把值发送给浏览器；编辑器中已有的 `NAME=` 表示保留该 secret。
+`env` and HTTP `headers` use the settings schema's secret role. Settings reads
+return only which secret keys exist; values are never sent to the browser. An
+existing `NAME=` entry in the editor means “keep this secret unchanged.”
 
-MCP server 进程及其安装脚本位于 Agent 沙箱之外。只配置你信任的命令、包与远程端点。
+MCP server processes and their installation scripts run outside the Agent
+sandbox. Configure only commands, packages, and remote endpoints you trust.
 
-## 开发
+## Development
 
 ```bash
 pnpm install
 pnpm check
 ```
 
-Client 产物遵守 DSH 动态模块格式：`lib/client.js` 调用 `window.__ModuleLoader__.load(...)`，并把 React、Cordis 与 UI primitives 解析到宿主模块表。Host 和 Client 构建产物均提交到仓库，供 GitHub spec 直接安装。
+The Client artifact follows DSH's dynamic-module format: `lib/client.js` calls
+`window.__ModuleLoader__.load(...)` and resolves React, Cordis, and UI
+primitives from the host module table. Built Host and Client artifacts are
+committed so a GitHub-spec installation can load them directly.
 
 ## License
 
