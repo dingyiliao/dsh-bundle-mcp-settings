@@ -1,0 +1,7 @@
+# Mount one Host manager. The same package declares a browser client face, so
+# Web/Desktop client module discovery also loads its MCP Settings tab.
+- insert:
+    - id: managed-mcp-settings
+      name: '@dingyiliao/dsh-mcp-settings'
+      config:
+        servers: {}
