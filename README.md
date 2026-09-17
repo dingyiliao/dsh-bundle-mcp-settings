@@ -23,10 +23,11 @@ Bundle 不重新实现 MCP 协议，只管理 DSH 已有 MCP client 的配置与
 ## 安装
 
 ```bash
-dsh plugin --profile web add github:dingyiliao/dsh-bundle-mcp-settings#<commit-sha>
+dsh plugin --profile web add github:dingyiliao/dsh-bundle-mcp-settings#v0.1.0
 ```
 
-安装后重启 DSH。建议固定 commit SHA，避免仓库后续更新静默改变本地执行的代码。
+安装后重启 DSH。版本标签便于安装；对供应链固定要求更高时，可以把
+`v0.1.0` 换成对应的完整 commit SHA。
 
 正式打包的 Desktop 目前只接受 npm registry 包，不能直接接收 `github:` spec；该场景需要等待发布到 npm，或由 Desktop 后续增加 GitHub source 支持。
 
